@@ -1,1 +1,58 @@
+// ================= FRONTEND (React) =================
+// Archivo: frontend/App.js
+
+import React, { useEffect, useState } from 'react';
+
+function App() {
+  const [docentes, setDocentes] = useState([]);
+  const [cursos, setCursos] = useState([]);
+  const [aulas, setAulas] = useState([]);
+  const [horario, setHorario] = useState([]);
+
+  const fetchData = async () => {
+    const d = await fetch('http://localhost:3000/docentes').then(r => r.json());
+    const c = await fetch('http://localhost:3000/cursos').then(r => r.json());
+    const a = await fetch('http://localhost:3000/aulas').then(r => r.json());
+
+    setDocentes(d);
+    setCursos(c);
+    setAulas(a);
+  };
+
+  const generarHorario = async () => {
+    const res = await fetch('http://localhost:3000/generar-horario');
+    const data = await res.json();
+    setHorario(data);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h1>Generador de Horarios</h1>
+
+      <button onClick={generarHorario}>Generar Horario</button>
+
+      <h2>Horario</h2>
+      <ul>
+        {horario.map((h, i) => (
+          <li key={i}>
+            {h.curso} - {h.docente} - {h.aula} - {h.hora}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default App;
+
+/*
+INSTRUCCIONES FRONTEND:
+1. npx create-react-app frontend
+2. Reemplazar App.js con este código
+3. npm start
+*/
 
