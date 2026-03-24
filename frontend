@@ -1,58 +1,76 @@
-// ================= FRONTEND (React) =================
-// Archivo: frontend/App.js
+// ================= BACKEND (Node.js + Express) =================
+// Archivo: backend/server.js
 
-import React, { useEffect, useState } from 'react';
+const express = require('express');
+const cors = require('cors');
 
-function App() {
-  const [docentes, setDocentes] = useState([]);
-  const [cursos, setCursos] = useState([]);
-  const [aulas, setAulas] = useState([]);
-  const [horario, setHorario] = useState([]);
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-  const fetchData = async () => {
-    const d = await fetch('http://localhost:3000/docentes').then(r => r.json());
-    const c = await fetch('http://localhost:3000/cursos').then(r => r.json());
-    const a = await fetch('http://localhost:3000/aulas').then(r => r.json());
+// Datos en memoria (luego se conecta a MySQL)
+let docentes = [];
+let cursos = [];
+let aulas = [];
 
-    setDocentes(d);
-    setCursos(c);
-    setAulas(a);
-  };
+// Rutas básicas
+app.get('/', (req, res) => {
+  res.send('API Horarios funcionando');
+});
 
-  const generarHorario = async () => {
-    const res = await fetch('http://localhost:3000/generar-horario');
-    const data = await res.json();
-    setHorario(data);
-  };
+// DOCENTES
+app.post('/docentes', (req, res) => {
+  const docente = req.body;
+  docentes.push(docente);
+  res.json({ mensaje: 'Docente agregado', docente });
+});
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+app.get('/docentes', (req, res) => {
+  res.json(docentes);
+});
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Generador de Horarios</h1>
+// CURSOS
+app.post('/cursos', (req, res) => {
+  const curso = req.body;
+  cursos.push(curso);
+  res.json({ mensaje: 'Curso agregado', curso });
+});
 
-      <button onClick={generarHorario}>Generar Horario</button>
+app.get('/cursos', (req, res) => {
+  res.json(cursos);
+});
 
-      <h2>Horario</h2>
-      <ul>
-        {horario.map((h, i) => (
-          <li key={i}>
-            {h.curso} - {h.docente} - {h.aula} - {h.hora}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
+// AULAS
+app.post('/aulas', (req, res) => {
+  const aula = req.body;
+  aulas.push(aula);
+  res.json({ mensaje: 'Aula agregada', aula });
+});
 
-export default App;
+app.get('/aulas', (req, res) => {
+  res.json(aulas);
+});
+
+// GENERAR HORARIO (básico)
+app.get('/generar-horario', (req, res) => {
+  const horario = cursos.map((curso, i) => ({
+    curso: curso.nombre,
+    docente: docentes[i % docentes.length]?.nombre || 'No asignado',
+    aula: aulas[i % aulas.length]?.nombre || 'No asignada',
+    hora: `Hora ${i + 1}`
+  }));
+
+  res.json(horario);
+});
+
+app.listen(3000, () => console.log('Servidor corriendo en http://localhost:3000'));
 
 /*
-INSTRUCCIONES FRONTEND:
-1. npx create-react-app frontend
-2. Reemplazar App.js con este código
-3. npm start
+INSTRUCCIONES BACKEND:
+1. Crear carpeta backend
+2. npm init -y
+3. npm install express cors
+4. node server.js
 */
+
 
